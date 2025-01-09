@@ -20,22 +20,25 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): Response
     {
+      
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => ['required', 'string', 'in:member,admin'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ]);
-
+        $photoPath = null;
+        if ($request->hasFile('image')) {
+            $photoPath = $request->file('image')->store('image', 'public');
+        }
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->string('password')),
+            'password' => Hash::make('Test@123'), // Set default password here
+            'image' => $photoPath,
+            'role' => $request->role, 
         ]);
-
         event(new Registered($user));
-
-        Auth::login($user);
-
         return response()->noContent();
     }
 }

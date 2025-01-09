@@ -13,14 +13,6 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    // public function store(LoginRequest $request): Response
-    // {
-    //     $request->authenticate();
-
-    //     $request->session()->regenerate();
-
-    //     return response()->noContent();
-    // }
     public function store(LoginRequest $request)
     {
         $credentials = $request->only('email', 'password');
@@ -32,7 +24,6 @@ class AuthenticatedSessionController extends Controller
         }
 
         return response()->json(['message' => 'Unauthorized'], 401);
-        // return $this->error("Credentials do not match", 401);
     }
 
     /**

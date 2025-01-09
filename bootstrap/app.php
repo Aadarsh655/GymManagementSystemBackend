@@ -19,9 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
         ]);
-        // $middleware->validateCsrfTokens(except: [
-        //     'login'
-        // ]);
+        $middleware->validateCsrfTokens(except: [
+            'api/login', 'api/forgot-password','api/register'
+        ]);
 
         //
     })
