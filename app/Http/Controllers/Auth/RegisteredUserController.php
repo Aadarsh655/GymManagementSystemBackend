@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules;
 
 class RegisteredUserController extends Controller
@@ -18,15 +19,16 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): Response
+    public function store(Request $request): JsonResponse
     {
-      
+        
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'role' => ['required', 'string', 'in:member,admin'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:9048'],
         ]);
+        
         $photoPath = null;
         if ($request->hasFile('image')) {
             $photoPath = $request->file('image')->store('image', 'public');
@@ -39,6 +41,16 @@ class RegisteredUserController extends Controller
             'role' => $request->role, 
         ]);
         event(new Registered($user));
-        return response()->noContent();
+        return response()->json(['message' => 'User registered successfully!', 'user' => $user], 201);
+
     }
+    public function index(){
+        $user = User::select('id','name','email','role','image')
+        ->get()->map(function($user){
+           $user->image_url = $user->image ? url('storage/'  . $user->image) : null;
+           $user->status = 'Active';
+           return $user; 
+        });
+        return response()->json($user);
+        }
 }

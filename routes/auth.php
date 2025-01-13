@@ -14,6 +14,8 @@ Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware('guest')
     ->name('register');
 
+Route::get('/user', [RegisteredUserController::class, 'index']);
+
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest')
     ->name('login');
@@ -39,6 +41,7 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
 
 Route::post('/blog', [BlogController::class, 'store']);
+Route::get('/blog', [BlogController::class, 'index']);
 Route::put('/blog/{blog}',[BlogController::class,'update']);
 Route::delete('/blog/{blog}',[BlogController::class, 'destroy']);
 

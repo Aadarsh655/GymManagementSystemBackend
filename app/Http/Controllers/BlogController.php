@@ -69,4 +69,14 @@ class BlogController extends Controller
         'message'=>'Blog deleted Successfully',
     ], Response::HTTP_OK);
     }
+
+    public function index(){
+        $blog = Blog::select('id','title','content','image','slug')
+        ->get()->map(function($blog){
+           $blog->image_url = $blog->image ? url('storage/'  . $blog->image) : null;
+           $blog->status = 'Active';
+           return $blog; 
+        });
+        return response()->json($blog);
+        }
 }
