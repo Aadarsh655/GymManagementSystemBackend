@@ -27,7 +27,8 @@ class PaymentController extends Controller
     
         // Create the payment record
         $payment = \App\Models\Payment::create([
-            'user_id' => $user->id,
+            //'user_id' => $user->name,
+            'user_id' => $validatedData['user_id'],
             'membership_id' => $membership->membership_id,
             'amount' => $membership->price, // Automatically set the amount from the membership
             'discount' => $validatedData['discount'] ?? 0,
@@ -56,6 +57,33 @@ class PaymentController extends Controller
             ],
         ], 201);
     }
+    public function index(){
+        $payments = Payment::select('payment_id', 'user_id', 'membership_id', 'amount', 'discount', 'paid_amount', 'due_amount', 'status', 'paid_date', 'expire_date')->get();
+        // Map through payments to include user and membership details
+        $payments = $payments->map(function ($payment) {
+            $user = \App\Models\User::find($payment->user_id); // Fetch user
+            $membership = \App\Models\Membership::find($payment->membership_id); // Fetch membership
+            return [
+                'payment_id' => $payment->payment_id,
+                'user_id' => $payment->user_id,
+                'user_name' => $user ? $user->name : 'Unknown User', // Handle null users
+                'membership_name' => $membership ? $membership->membership_name : 'Unknown Membership', // Handle null memberships
+                'amount' => $payment->amount,
+                'discount' => $payment->discount,
+                'paid_amount' => $payment->paid_amount,
+                'due_amount' => $payment->due_amount,
+                'status' => $payment->status,
+                'paid_date' => $payment->paid_date,
+                'expire_date' => $payment->expire_date,
+            ];
+        });
     
-
+        // Return payments as a JSON response
+        return response()->json([
+            'message' => 'Payments fetched successfully.',
+            'payments' => $payments,
+        ]);
+    }
+    
 }
+                                                                         
