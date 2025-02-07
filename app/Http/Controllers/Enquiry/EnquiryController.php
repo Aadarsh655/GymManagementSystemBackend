@@ -35,4 +35,11 @@ class EnquiryController extends Controller
         return response()->json(['message' => 'Reply sent successfully!']);
 
     }
+    public function index()
+    {
+        $enquiries = Enquiry::all(); // Retrieve all enquiries from the database
+        return response()->json($enquiries); // Return them as a JSON response
+    }
 }
+
+

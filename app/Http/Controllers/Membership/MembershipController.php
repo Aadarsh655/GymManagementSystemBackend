@@ -11,7 +11,7 @@ class MembershipController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'membership_name' => 'required|string|unique:memberships,membership_name|max:255',
+            'membership_name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'facilities' => 'nullable|array',
             'status' => 'required|in:Active,Inactive',
@@ -24,9 +24,27 @@ class MembershipController extends Controller
             'membership' => $membership,
         ], 201);
     }
+    public function update(Request $request, $id)
+{
+    $membership = Membership::findOrFail($id);
+
+    $validatedData = $request->validate([
+        'membership_name' => 'required|string|max:255',
+        'price' => 'required|numeric|min:0',
+        'facilities' => 'nullable|array',
+        'status' => 'required|in:Active,Inactive',
+    ]);
+
+    $membership->update($validatedData);
+
+    return response()->json([
+        'message' => 'Membership updated successfully.',
+        'membership' => $membership,
+    ], 200);
+}
+
     public function index(){
         $membership=Membership::select('membership_id','membership_name','price','facilities','status')->get()->map(function($membership){
-            $membership->status="Active";
             return $membership;
         });
         return response()->json($membership);

@@ -22,6 +22,16 @@ class DashboardController extends Controller
                     ->select('memberships.membership_name as membership_name', DB::raw('COUNT(payments.membership_id) as count'))
                     ->groupBy('memberships.membership_name')
                     ->get();
+                $expiredUsers = User::join('payments', 'users.id', '=', 'payments.user_id')
+    ->whereDate('payments.expire_date', '<', Carbon::now())
+    ->select('users.id', 'users.name', 'users.image', 'payments.expire_date', 'payments.amount')
+    ->get();
+    $expiringUsers = User::join('payments', 'users.id', '=', 'payments.user_id')
+    ->where('payments.expire_date', '<', Carbon::now()->addDays(7)) // Expiring in less than 7 days
+    ->where('payments.expire_date', '>=', Carbon::now()) // Still active (not expired yet)
+    ->select('users.id', 'users.name', 'users.image', 'payments.expire_date', 'payments.amount')
+    ->get();
+
 
             return response()->json([
                 'success'=> true,
@@ -31,6 +41,8 @@ class DashboardController extends Controller
                     'recent_members'=> $recentMembers,
                     'monthly_growth' =>$monthlyGrowth,
                     'membership_breakdown' => $membershipBreakdown,
+                    'expired_members' => $expiredUsers,
+                    'expiring_members'=>$expiringUsers,
                 ],
             ],200);
         }

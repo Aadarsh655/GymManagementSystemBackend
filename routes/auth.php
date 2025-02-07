@@ -18,6 +18,7 @@ use App\Http\Controllers\RecentMembersController;
 Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware('guest')
     ->name('register');
+Route::post('/register/{id}',[RegisteredUserController::class,'update']);
 
 Route::get('/user', [RegisteredUserController::class, 'index']);
 
@@ -47,17 +48,21 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 //Blog
 Route::post('/blog', [BlogController::class, 'store']);
 Route::get('/blog-table', [BlogController::class, 'index']);
-Route::put('/blog/{blog}',[BlogController::class,'update']);
+Route::patch('/blog/{blog}',[BlogController::class,'update']);
 Route::delete('/blog/{blog}',[BlogController::class, 'destroy']);
 //Dashboard Count
 Route::get('/dashboardCount',[DashboardController::class,'dashboardCounts']);
 //Membership
 Route::post('/membership',[MembershipController::class, 'store']);
 Route::get('/membership',[MembershipController::class, 'index']);
+Route::patch('/membership/{id}',[MembershipController::class,'update']);
 //Payments
 Route::post('/payments',[PaymentController::class,'store']);
 Route::get('/payments',[PaymentController::class,'index']);
+Route::patch('/payments/{payment_id}',[PaymentController::class,'update']);
+Route::delete('/payments',[PaymentController::class,'destroy']);
 //Enquiry
 Route::post('/enquiries', [EnquiryController::class, 'store']); // Save enquiry
 Route::post('/enquiries/reply/{id}', [EnquiryController::class, 'reply']); 
+Route::get('/enquiries',[EnquiryController::class,'index']);
 

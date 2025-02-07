@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use App\Models\Blog;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class BlogController extends Controller
 {
@@ -41,26 +43,27 @@ class BlogController extends Controller
         ], Response::HTTP_CREATED);
     }
 
-    public function update(Request $request, Blog $blog): Response{
+    public function update(Request $request, $id)
+    {
         $validatedData = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'content' => 'sometimes|required|string',
-            'author' => 'sometimes|required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Optional image validation
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-        $validatedData['slug'] = Str::slug($validatedData['title'], '-') . '-' . uniqid();
-        if ($request->hasFile('image')) {
-            $validatedData['image'] = $request->file('image')->store('blog_images', 'public');
-        }
-
-        // Update the blog
-        $blog->update($validatedData);
-
-        return response([
+    
+        $blog = Blog::findOrFail($id);
+        $blog->update([
+            'title' => $request->title,
+            'content' => $request->content,
+            'image' => $request->hasFile('image') ? $request->file('image')->store('blog_images', 'public') : $blog->image,
+        ]);
+    
+        return response()->json([
             'message' => 'Blog updated successfully!',
             'data' => $blog,
-        ], Response::HTTP_OK);
+        ], JsonResponse::HTTP_OK);
     }
+    
 
     public function destroy(Blog $blog): Response{
         $blog->delete();
