@@ -10,6 +10,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CountUserController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Enquiry\EnquiryController;
+use App\Http\Controllers\EsewaPaymentController;
 use App\Http\Controllers\Membership\MembershipController;
 use App\Http\Controllers\Payment\PaymentController;
 use App\Http\Controllers\PendingAmountController;
@@ -50,6 +51,8 @@ Route::post('/blog', [BlogController::class, 'store']);
 Route::get('/blog-table', [BlogController::class, 'index']);
 Route::patch('/blog/{blog}',[BlogController::class,'update']);
 Route::delete('/blog/{blog}',[BlogController::class, 'destroy']);
+Route::get('/blog/{slug}', [BlogController::class, 'show']);
+
 //Dashboard Count
 Route::get('/dashboardCount',[DashboardController::class,'dashboardCounts']);
 //Membership
@@ -66,3 +69,5 @@ Route::post('/enquiries', [EnquiryController::class, 'store']); // Save enquiry
 Route::post('/enquiries/reply/{id}', [EnquiryController::class, 'reply']); 
 Route::get('/enquiries',[EnquiryController::class,'index']);
 
+Route::post('/payment/initialize', [EsewaPaymentController::class, 'initializePayment'])->name('payment.initialize');
+Route::post('/payment/verify', [EsewaPaymentController::class, 'verifyPayment'])->name('payment.verify');

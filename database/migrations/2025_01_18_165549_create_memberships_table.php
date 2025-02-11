@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('membership_id');
             $table->string('membership_name')->unique();
             $table->decimal('price', 10, 2);
-            $table->json('facilities')->nullable(); // Changed to JSON for flexibility
+            $table->json('facilities')->nullable();
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->timestamps();
         });

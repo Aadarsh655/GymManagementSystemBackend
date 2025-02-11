@@ -48,7 +48,7 @@ class BlogController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable',
         ]);
     
         $blog = Blog::findOrFail($id);
@@ -73,13 +73,31 @@ class BlogController extends Controller
     ], Response::HTTP_OK);
     }
 
-    public function index(){
-        $blog = Blog::select('id','title','content','image','slug')
-        ->get()->map(function($blog){
-           $blog->image_url = $blog->image ? url('storage/'  . $blog->image) : null;
-           $blog->status = 'Active';
-           return $blog; 
-        });
-        return response()->json($blog);
-        }
+    public function index() {
+        $blogs = Blog::select('id', 'title', 'content', 'image', 'slug', 'created_at')
+            ->get()
+            ->map(function ($blog) {
+                $blog->image_url = $blog->image ? url('storage/' . $blog->image) : null;
+                $blog->status = 'Active';
+                return $blog;
+            });
+
+        return response()->json($blogs, 200, ['Content-Type' => 'application/json']);
+    }
+
+    public function show($slug)
+{
+    $blog = Blog::where('slug', $slug)->first();
+
+    if (!$blog) {
+        return response()->json(['message' => 'Blog not found'], 404);
+    }
+    $blog->image_url = $blog->image ? url('storage/' . $blog->image) : null;
+    return response()->json([
+        'title' => $blog->title,
+        'content' => $blog->content,
+        'image_url' => $blog->image_url, 
+        'created_at' => $blog->created_at,
+    ], 200, ['Content-Type' => 'application/json']);
+}
 }

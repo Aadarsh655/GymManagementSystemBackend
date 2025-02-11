@@ -94,13 +94,14 @@ class RegisteredUserController extends Controller
     // }    
     public function update(Request $request, $id)
     {
+        // dd($request->all());
         $user = User::findOrFail($id);
    
         $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'role' => ['sometimes', 'string', 'in:Member,Admin'],
-            'image' => ['sometimes','nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:9048'],
+            'image' => ['nullable'],
             'age' => ['sometimes', 'integer', 'min:0', 'max:120'],
             'gender' => ['sometimes', 'string', 'in:Male,Female'],
             'blood_group' => ['sometimes', 'string', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
