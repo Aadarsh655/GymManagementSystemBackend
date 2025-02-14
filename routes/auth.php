@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -15,13 +17,16 @@ use App\Http\Controllers\Membership\MembershipController;
 use App\Http\Controllers\Payment\PaymentController;
 use App\Http\Controllers\PendingAmountController;
 use App\Http\Controllers\RecentMembersController;
+use Rats\Zkteco\Lib\Helper\Attendance;
+use Rats\Zkteco\Lib\ZKTeco;
 
 Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware('guest')
     ->name('register');
 Route::post('/register/{id}',[RegisteredUserController::class,'update']);
 
-Route::get('/user', [RegisteredUserController::class, 'index']);
+Route::get('/users', [RegisteredUserController::class, 'index']);
+Route::middleware('auth:sanctum')->get('/user', [RegisteredUserController::class, 'getLoggedInUserDetails']);
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest')
@@ -71,3 +76,7 @@ Route::get('/enquiries',[EnquiryController::class,'index']);
 
 Route::post('/payment/initialize', [EsewaPaymentController::class, 'initializePayment'])->name('payment.initialize');
 Route::post('/payment/verify', [EsewaPaymentController::class, 'verifyPayment'])->name('payment.verify');
+
+Route::get('/test-zkteco', [AttendanceController::class,'connect']);
+Route::get('/userss', [AttendanceController::class,'userList']);
+Route::get('/attendance', [AttendanceController::class,'showAttendance']);

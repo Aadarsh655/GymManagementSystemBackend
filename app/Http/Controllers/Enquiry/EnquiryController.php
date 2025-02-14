@@ -21,7 +21,6 @@ class EnquiryController extends Controller
     }
     public function reply(Request $request, $id){
         $enquiry = Enquiry::findOrFail($id);
-
         $validated = $request->validate([
             'reply' => 'required|string',
         ]);
