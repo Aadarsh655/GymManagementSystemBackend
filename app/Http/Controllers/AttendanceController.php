@@ -26,7 +26,7 @@ class AttendanceController extends Controller
         return response()->json(['success' => false, 'message' => 'Failed to connect to ZKTeco.']);
     }
 
-    public function userList($limit = 10)
+    public function getUsers($limit = 10)
     {
         $users = $this->zkteco->getUser(); 
     

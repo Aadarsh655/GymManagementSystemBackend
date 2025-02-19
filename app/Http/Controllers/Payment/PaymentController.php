@@ -111,14 +111,9 @@ class PaymentController extends Controller
             ],
         ]);
     }
-    
-    // Delete a payment record
     public function destroy($payment_id)
     {
-        // Find the payment record
         $payment = Payment::findOrFail($payment_id);
-
-        // Delete the payment record
         $payment->delete();
 
         return response()->json([

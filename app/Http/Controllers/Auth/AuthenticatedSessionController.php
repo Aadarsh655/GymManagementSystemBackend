@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -25,18 +26,20 @@ class AuthenticatedSessionController extends Controller
 
         return response()->json(['message' => 'Unauthorized'], 401);
     }
-
-    /**
-     * Destroy an authenticated session.
-     */
-    public function destroy(Request $request): Response
+    public function destroy(Request $request): JsonResponse
     {
+        $user = $request->user();
+
+        // Revoke API tokens (for Sanctum/Passport)
+        if ($user) {
+            $user->tokens()->delete(); // Removes all tokens for the user
+        }
+
+        // Logout for session-based authentication
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
-        return response()->noContent();
+        return response()->json(['message'=>"Successfully logged out"],200); // Return 204 No Content
     }
 }

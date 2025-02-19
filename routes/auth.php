@@ -19,7 +19,7 @@ use App\Http\Controllers\PendingAmountController;
 use App\Http\Controllers\RecentMembersController;
 use Rats\Zkteco\Lib\Helper\Attendance;
 use Rats\Zkteco\Lib\ZKTeco;
-
+use App\Http\Controllers\KhaltiPaymentController;
 Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware('guest')
     ->name('register');
@@ -48,13 +48,15 @@ Route::post('/email/verification-notification', [EmailVerificationNotificationCo
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.send');
 
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-    ->middleware('auth')
-    ->name('logout');
+// Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+//     ->middleware('auth')
+//     ->name('logout');
+    Route::middleware('auth:sanctum')->post('/logout', [AuthenticatedSessionController::class, 'destroy']);
+
 //Blog
 Route::post('/blog', [BlogController::class, 'store']);
 Route::get('/blog-table', [BlogController::class, 'index']);
-Route::patch('/blog/{blog}',[BlogController::class,'update']);
+Route::post('/blog/{id}',[BlogController::class,'update']);
 Route::delete('/blog/{blog}',[BlogController::class, 'destroy']);
 Route::get('/blog/{slug}', [BlogController::class, 'show']);
 
@@ -68,15 +70,20 @@ Route::patch('/membership/{id}',[MembershipController::class,'update']);
 Route::post('/payments',[PaymentController::class,'store']);
 Route::get('/payments',[PaymentController::class,'index']);
 Route::patch('/payments/{payment_id}',[PaymentController::class,'update']);
-Route::delete('/payments',[PaymentController::class,'destroy']);
+Route::delete('/payments/{payment_id}',[PaymentController::class,'destroy']);
 //Enquiry
 Route::post('/enquiries', [EnquiryController::class, 'store']); // Save enquiry
 Route::post('/enquiries/reply/{id}', [EnquiryController::class, 'reply']); 
+Route::delete('/enquiries',[EnquiryController::class,'destroy']);
+Route::delete('/enquiries/{id}',[EnquiryController::class,'destroy']);
 Route::get('/enquiries',[EnquiryController::class,'index']);
-
-Route::post('/payment/initialize', [EsewaPaymentController::class, 'initializePayment'])->name('payment.initialize');
-Route::post('/payment/verify', [EsewaPaymentController::class, 'verifyPayment'])->name('payment.verify');
-
 Route::get('/test-zkteco', [AttendanceController::class,'connect']);
-Route::get('/userss', [AttendanceController::class,'userList']);
+Route::get('/getusers', [AttendanceController::class,'getUsers']);
 Route::get('/attendance', [AttendanceController::class,'showAttendance']);
+
+Route::post('/khalti/payment', [KhaltiPaymentController::class, 'purchase']);
+// In routes/web.php
+Route::post('/khalti/payment/verify', [KhaltiPaymentController::class, 'verify']);
+
+
+

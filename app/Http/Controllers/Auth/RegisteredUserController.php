@@ -29,7 +29,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'role' => ['required', 'string', 'in:Member,Admin'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:9048'],
+            'image' => ['nullable'],
             'age' => ['required', 'integer', 'min:0', 'max:120'], // Age validation
             'gender' => ['required', 'string', 'in:Male,Female'], // Gender validation
             'blood_group' => ['required', 'string', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-']

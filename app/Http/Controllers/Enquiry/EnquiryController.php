@@ -34,6 +34,16 @@ class EnquiryController extends Controller
         return response()->json(['message' => 'Reply sent successfully!']);
 
     }
+    public function destroy($id){
+        $enquiry = Enquiry::findorFail($id);
+        $enquiry->delete();
+
+        return response()->json([
+            'message'=>"Enquiry Deleted Successfully",
+            'Enquiry_id'=>$id,
+        ]);
+    }
+    
     public function index()
     {
         $enquiries = Enquiry::all(); // Retrieve all enquiries from the database
