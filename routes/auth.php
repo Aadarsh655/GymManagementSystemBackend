@@ -40,6 +40,9 @@ Route::post('/reset-password', [NewPasswordController::class, 'store'])
     ->middleware('guest')
     ->name('password.store');
 
+Route::middleware('auth:sanctum')->post('/password/change', [NewPasswordController::class, 'changePassword']);
+
+
 Route::get('/verify-email/{id}/{hash}', VerifyEmailController::class)
     ->middleware(['auth', 'signed', 'throttle:6,1'])
     ->name('verification.verify');
@@ -48,10 +51,7 @@ Route::post('/email/verification-notification', [EmailVerificationNotificationCo
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.send');
 
-// Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-//     ->middleware('auth')
-//     ->name('logout');
-    Route::middleware('auth:sanctum')->post('/logout', [AuthenticatedSessionController::class, 'destroy']);
+Route::middleware('auth:sanctum')->post('/logout', [AuthenticatedSessionController::class, 'destroy']);
 
 //Blog
 Route::post('/blog', [BlogController::class, 'store']);

@@ -42,4 +42,30 @@ class NewPasswordController extends Controller
 
         return response()->json(['status' => __($status)]);
     }
+
+    public function changePassword(Request $request): JsonResponse
+{
+    $request->validate([
+        'current_password' => ['required'],
+        'password' => ['required', 'confirmed', Rules\Password::defaults()],
+    ]);
+
+    $user = $request->user(); // Get the authenticated user
+
+    // Check if the current password is correct
+    if (!Hash::check($request->input('current_password'), $user->password)) {
+        throw ValidationException::withMessages([
+            'current_password' => ['The provided password does not match your current password.'],
+        ]);
+    }
+
+    // Update the password
+    $user->forceFill([
+        'password' => Hash::make($request->input('password')),
+        'remember_token' => Str::random(60), // Optional, for token-based authentication
+    ])->save();
+
+    return response()->json(['status' => __('Password changed successfully.')]);
+}
+
 }
