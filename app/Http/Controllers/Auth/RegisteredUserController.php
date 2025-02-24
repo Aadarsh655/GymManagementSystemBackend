@@ -9,11 +9,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserWelcomeMail;
 
 class RegisteredUserController extends Controller
 {
@@ -30,11 +29,11 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'role' => ['required', 'string', 'in:Member,Admin'],
             'image' => ['nullable'],
-            'age' => ['required', 'integer', 'min:0', 'max:120'], // Age validation
-            'gender' => ['required', 'string', 'in:Male,Female'], // Gender validation
+            'age' => ['required', 'integer', 'min:0', 'max:120'],
+            'gender' => ['required', 'string', 'in:Male,Female'], 
             'blood_group' => ['required', 'string', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-']
         ]);
-        
+        $randomPassword = Str::random(16);
         $photoPath = null;
         if ($request->hasFile('image')) {
             $photoPath = $request->file('image')->store('image', 'public');
@@ -43,7 +42,7 @@ class RegisteredUserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make('Test@123'), // Set default password here
+            'password' => Hash::make($randomPassword), 
             'image' => $photoPath,
             'role' => $request->role, 
             'age' => $request->age,
@@ -52,12 +51,12 @@ class RegisteredUserController extends Controller
         ]);
      
         event(new Registered($user));
+        Mail::to($user->email)->send(new UserWelcomeMail($user, $randomPassword));
         return response()->json(['message' => 'User registered successfully!', 'user' => $user], 201);
     }
         
     public function update(Request $request, $id)
     {
-        // dd($request->all());
         $user = User::findOrFail($id);
    
         $request->validate([
@@ -88,8 +87,6 @@ class RegisteredUserController extends Controller
         ], 200);
     }
     
-    
-    
     public function index(){
         $user = User::select('id','name','email','role','image','age','gender','blood_group')
         ->get()->map(function($user){
@@ -102,14 +99,11 @@ class RegisteredUserController extends Controller
 
         public function getLoggedInUserDetails(Request $request)
     {
-        // Get authenticated user
         $user = Auth::user(); 
 
         if (!$user) {
             return response()->json(['message' => 'User not authenticated'], 401);
         }
-
-        // Return user data along with the image URL
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,

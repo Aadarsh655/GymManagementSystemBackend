@@ -15,9 +15,7 @@ class KhaltiPaymentController extends Controller{
             'amount' => 'required|numeric',
             'user'=> 'required|string',
         ]);
-
         $totalAmount = $eventData['amount'] * 100;
-
         $fields = array(
             "return_url" => "http://localhost:5173/verify-payment",
             "website_url" => "http://localhost:5173/",
@@ -43,7 +41,7 @@ class KhaltiPaymentController extends Controller{
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => $postfields,
             CURLOPT_HTTPHEADER => array(
-                'Authorization: key 1bee9fe34f384f73a9dcc1d98dbf844a',
+                'Authorization: key fa8a723551f44a73840d7ac3a364c422',
                 'Content-Type: application/json',
             ),
         ));
@@ -62,116 +60,60 @@ class KhaltiPaymentController extends Controller{
             return response()->json(['error' => 'Unexpected response'], 500);
         }
     }
-    // public function verify(Request $request)
-    // {
-    //     // Validate incoming request
-    //     $validatedData = $request->validate([
-    //         'payment_id' => 'required|string',
-    //         'status' => 'required|string',
-    //         'transaction_id' => 'required|string',
-    //         'amount' => 'required|numeric',
-    //         'purchase_order_id' => 'required|string',
-    //         'purchase_order_name' => 'required|string',
-    //         'user'=>'required|string'
-    //     ]);
-    
-    //     // Get the validated data from the request
-    //     $paymentId = $validatedData['payment_id'];
-    //     $status = $validatedData['status'];
-    //     $transactionId = $validatedData['transaction_id'];
-    //     $amount = $validatedData['amount'];
-    //     $purchaseOrderId = $validatedData['purchase_order_id'];
-    //     $purchaseOrderName = $validatedData['purchase_order_name'];
-    //     $user = $validatedData['user'];
-    
-    //     // Call Khalti API to verify the payment
-    //     $response = Http::withHeaders([
-    //         'Authorization' => 'key 1bee9fe34f384f73a9dcc1d98dbf844a',
-    //     ])->post('https://dev.khalti.com/api/v2/epayment/verify/', [
-    //         'payment_id' => $paymentId,
-    //     ]);
-    
-    //     // Log the response for debugging
-      
-    
-    //     // Check if the Khalti verification response is successful
-    //     $responseData = $response->json();
-    
-    //     if (isset($responseData['status']) && $responseData['status'] === 'SUCCESS') {
-    //         // Additional validation to make sure the amounts and details match
-    //         if ($amount != $responseData['amount']) {
-               
-    //             return response()->json(['success' => false, 'error' => 'Amount mismatch']);
-    //         }
-    
-    //         if ($purchaseOrderId != $responseData['purchase_order_id']) {
-           
-    //             return response()->json(['success' => false, 'error' => 'Purchase Order ID mismatch']);
-    //         }
-    
-    //         if ($purchaseOrderName != $responseData['purchase_order_name']) {
-    //             return response()->json(['success' => false, 'error' => 'Purchase Order Name mismatch']);
-    //         }
-    
-    //         // If everything matches, proceed with further business logic
-    //         return response()->json(['success' => true]);
-    //     } else {
-    //         // Log the failed verification response
-    //         return response()->json(['success' => false, 'error' => $responseData]);
-    //     }
-    // }
-    
+
+
     public function verify(Request $request)
-    {
-        $validatedData = $request->validate([
-            'status' => 'required|string',
-            'payment_id' => 'required|string',
-            'transaction_id' => 'required|string',
-            'amount' => 'required|numeric',
-            'purchase_order_id' => 'required|string',
-            'purchase_order_name' => 'required|string',
-            'user' => 'required|numeric',
-        ]);
-        if ($validatedData['status'] === 'Completed') {
-            $amountInCents = $validatedData['amount'];
-    
-            $existingPayment = Payment::where('user_id', $validatedData['user'])
-            ->where(function ($query) {
-                $query->where('expire_date', '>=', now()) 
-                      ->orWhereNull('expire_date'); 
-            })
-            ->where('status', 'Paid') 
-            ->first();
-    
-            if ($existingPayment) {
-                return response()->json([
-                    'message' => 'User already has an active membership. Cannot make another payment until it expires.',
-                    'data' => $existingPayment
-                ], 400);
-            }
-    
-        if ($validatedData['status'] === 'Completed') {
-            $amountInCents = $validatedData['amount']; 
-    
-            $payment = Payment::create([
-                'user_id' => $validatedData['user'], 
-                'membership_id' => $validatedData['purchase_order_id'], 
-                'amount' => $amountInCents,
-                'discount' => 0, 
-                'paid_amount' => $amountInCents,
-                'status' => 'Paid', 
-                'paid_date' => now(),
-                'expire_date' => null, 
-            ]);
-    
-            return response()->json([
-                'message' => 'Transaction completed successfully.',
-                'data' => $payment 
-            ]);
-        }
+{
+    $validatedData = $request->validate([
+        'status' => 'required|string',
+        'payment_id' => 'required|string',
+        'transaction_id' => 'required|string',
+        'amount' => 'required|numeric',
+        'purchase_order_id' => 'required|string',
+        'purchase_order_name' => 'required|string',
+        'user' => 'required|numeric',
+    ]);
+
+    if ($validatedData['status'] !== 'Completed') {
         return response()->json([
-            'message' => 'Transaction failed.',
+            'message' => 'Transaction failed.'
+        ], 400);  // Return failure response
+    }
+
+    $amountInRupees = $validatedData['amount'] / 100;
+
+    // Check if the user already has an active membership
+    $existingPayment = Payment::where('user_id', $validatedData['user'])
+        ->where(function ($query) {
+            $query->where('expire_date', '>=', now())
+                ->orWhereNull('expire_date');
+        })
+        ->where('status', 'Paid')
+        ->first();
+
+    if ($existingPayment) {
+        return response()->json([
+            'message' => 'User already has an active membership. Cannot make another payment until it expires.',
+            'data' => $existingPayment
         ], 400);
     }
+
+    // Create the payment record if the payment is completed
+    $payment = Payment::create([
+        'user_id' => $validatedData['user'],
+        'membership_id' => $validatedData['purchase_order_id'],
+        'amount' => $amountInRupees,
+        'discount' => 0,
+        'paid_amount' => $amountInRupees,
+        'status' => 'Paid',
+        'paid_date' => now(),
+        'expire_date' => null,
+    ]);
+
+    return response()->json([
+        'message' => 'Transaction completed successfully.',
+        'data' => $payment
+    ]);
 }
+
 }

@@ -16,6 +16,7 @@ class DashboardController extends Controller
             $userCount = User::count();
             $pendingAmount = Payment::sum('due_amount');
             $recentMembers = User::where('created_at','>=', Carbon::now()->subDays(7))->count();
+            $inactiveMembers =  User::where('status', 'inactive')->count();
             $monthlyGrowth = User::selectRaw('MONTH(created_at) as month, COUNT(*) as count')->whereYear('created_at',Carbon::now()->year)->groupBy('month')->orderBy('month')->get();
             $membershipBreakdown = DB::table('payments')
                     ->join('memberships', 'payments.membership_id', '=', 'memberships.membership_id')
@@ -39,6 +40,7 @@ class DashboardController extends Controller
                     'user_count'=> $userCount,
                     'pending_amount'=> $pendingAmount,
                     'recent_members'=> $recentMembers,
+                    'inactive_members' => $inactiveMembers,
                     'monthly_growth' =>$monthlyGrowth,
                     'membership_breakdown' => $membershipBreakdown,
                     'expired_members' => $expiredUsers,
