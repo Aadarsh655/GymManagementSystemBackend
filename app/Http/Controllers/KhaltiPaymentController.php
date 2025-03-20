@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-
+// use App\Http\Controllers\Response;
 class KhaltiPaymentController extends Controller{
     public function purchase(Request $request)
     {

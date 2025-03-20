@@ -1,6 +1,4 @@
 <?php
-
-use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -9,21 +7,17 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BlogController;
-use App\Http\Controllers\CountUserController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Enquiry\EnquiryController;
-use App\Http\Controllers\EsewaPaymentController;
 use App\Http\Controllers\Membership\MembershipController;
 use App\Http\Controllers\Payment\PaymentController;
-use App\Http\Controllers\PendingAmountController;
-use App\Http\Controllers\RecentMembersController;
-use Rats\Zkteco\Lib\Helper\Attendance;
 use Rats\Zkteco\Lib\ZKTeco;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\KhaltiPaymentController;
 Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware('guest')
     ->name('register');
-Route::post('/register/{id}',[RegisteredUserController::class,'update']);
+Route::put('/register/{id}',[RegisteredUserController::class,'update']);
 
 Route::get('/users', [RegisteredUserController::class, 'index']);
 Route::middleware('auth:sanctum')->get('/user', [RegisteredUserController::class, 'getLoggedInUserDetails']);
@@ -77,12 +71,14 @@ Route::post('/enquiries/reply/{id}', [EnquiryController::class, 'reply']);
 Route::delete('/enquiries',[EnquiryController::class,'destroy']);
 Route::delete('/enquiries/{id}',[EnquiryController::class,'destroy']);
 Route::get('/enquiries',[EnquiryController::class,'index']);
-Route::get('/test-zkteco', [AttendanceController::class,'connect']);
-Route::get('/getusers', [AttendanceController::class,'getUsers']);
-Route::get('/attendance', [AttendanceController::class,'showAttendance']);
 
+Route::get('/test-zkteco', [AttendanceController::class,'checkConnection']);
+Route::get('/getusers', [AttendanceController::class,'getUsers']);
+Route::post('/attendance/filter', [AttendanceController::class, 'getAttendanceByDate']);
+Route::get('/attendance/date', [AttendanceController::class, 'getAttendanceByDB']);
+Route::post('/attendance/store', [AttendanceController::class, 'storeAttendance']);
 Route::post('/khalti/payment', [KhaltiPaymentController::class, 'purchase']);
-// In routes/web.php
+
 Route::post('/khalti/payment/verify', [KhaltiPaymentController::class, 'verify']);
 
 

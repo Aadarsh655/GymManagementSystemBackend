@@ -1,41 +1,123 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Services\ZKTecoService;
 use Illuminate\Http\Request;
+use App\Models\Attendance;
+use Carbon\Carbon;
 class AttendanceController extends Controller
 {
-    protected $zkteco;
+    protected $zkService;
 
-    public function __construct(ZKTecoService $zkteco)
+    public function __construct(ZKTecoService $zkService)
     {
-        $this->zkteco = $zkteco;
+        $this->zkService = $zkService;
     }
-
-    public function showAttendance()
+     public function checkConnection()
     {
-        $attendanceData = $this->zkteco->getAttendanceData();
-        return view('attendance.index', compact('attendanceData'));
-    }
+        $connectionStatus = $this->zkService->connect(); 
 
-    public function connect()
-    {
-        if ($this->zkteco->connect()) {
-            return response()->json(['success' => true, 'message' => 'Connected successfully!']);
+        if ($connectionStatus) {
+            return response()->json(['status' => 'success', 'message' => 'Connected to the device']);
         }
-        return response()->json(['success' => false, 'message' => 'Failed to connect to ZKTeco.']);
+
+        return response()->json(['status' => 'error', 'message' => 'Failed to connect to the device'], 500);
     }
 
-    public function getUsers($limit = 10)
+
+    public function getUsers()
     {
-        $users = $this->zkteco->getUser(); 
-    
+        $users = $this->zkService->getUsers();
+
         if (!empty($users)) {
-            $limitedUsers = array_slice($users, 0, $limit);
-            return response()->json(['success' => true, 'users' => $limitedUsers], 200);
+            return response()->json(['success' => true, 'users' => $users], 200);
         }
-    
+
         return response()->json(['success' => false, 'message' => 'No users found'], 404);
     }
+
+
+    public function getAttendanceByDate(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date', 
+        ]);
+        $inputDate = Carbon::parse($request->date)->format('Y-m-d');
+
+        $attendanceData = $this->zkService->getAttendance();
+
+        $filteredAttendance = array_filter($attendanceData, function($attendance) use ($inputDate) {
+            $attendanceDate = Carbon::parse($attendance['timestamp'])->format('Y-m-d');
+
+            return $attendanceDate === $inputDate;
+        });
+
+        if (count($filteredAttendance) > 0) {
+            return response()->json([
+                'success' => true,
+                'attendance' => array_values($filteredAttendance),  
+            ], 200);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No attendance records found for the specified date'
+        ], 404);
+    }
+    public function storeAttendance(Request $request)
+    {
+        $validatedData = $request->validate([
+            'id' => 'required|integer|exists:users,id',
+            'timestamp' => 'nullable|date',
+        ]);
+
+        $userId = $validatedData['id'];
+        $timestamp = $validatedData['timestamp'] ?? now();
+
+        $attendanceData = $request->input('attendance');
     
+        foreach ($attendanceData as $attendance) {
+            Attendance::create([
+                'user_id' => $attendance['id'],
+                'biometric_id' => $attendance['uid'], 
+                'timestamp' => $attendance['timestamp'],
+                'status' => 'Present',
+                'state' => $attendance['state'],
+                'type' => $attendance['type'],
+            ]);
+        }
+    
+        return response()->json(['message' => 'Attendance recorded successfully'], 200);
+    }
+
+    public function getAttendanceByDB(Request $request)
+{
+    // Validate the input date
+    $request->validate([
+        'date' => 'required|date',
+    ]);
+
+    // Format the input date to match the format in the database
+    $inputDate = Carbon::parse($request->date)->format('Y-m-d');
+
+    // Retrieve attendance data from the 'attendances' table
+    $attendanceData = Attendance::whereDate('timestamp', $inputDate)->get();
+
+    // Check if any attendance data was found for the given date
+    if ($attendanceData->count() > 0) {
+        return response()->json([
+            'success' => true,
+            'attendance' => $attendanceData,  // Return the attendance data
+        ], 200);
+    }
+
+    // If no attendance data found, return an appropriate response
+    return response()->json([
+        'success' => false,
+        'message' => 'No attendance found for the given date',
+    ], 404);
 }
+
+}
+

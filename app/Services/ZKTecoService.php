@@ -1,9 +1,12 @@
 <?php
-
 namespace App\Services;
 
-use Rats\Zkteco\Lib\ZKTeco;
-
+use App\Models\Attendance;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Request;
+use Jmrashed\Zkteco\Lib\ZKTeco;
+use Jmrashed\Zkteco\Lib\ZKTeco as LibZKTeco;
 
 class ZKTecoService
 {
@@ -11,8 +14,7 @@ class ZKTecoService
 
     public function __construct()
     {
-        $this->zk = new ZKTeco(config('zkteco.ip'), config('zkteco.port'));
-
+        $this->zk = new ZKTeco('192.168.1.201', 4370);  
     }
 
     public function connect()
@@ -20,19 +22,23 @@ class ZKTecoService
         return $this->zk->connect();
     }
 
-    public function getAttendanceData()
+    public function getUsers()
     {
-        // Example: Get attendance records
-        return $this->zk->getAttendance();
-    }
+        $this->connect(); 
+        $users = $this->zk->getUser();
+        $this->zk->disconnect(); 
 
-    public function addUser($uid, $userid, $name, $password = '', $role = 0, $cardno = 0)
-    {
-        return $this->zk->setUser($uid, $userid, $name, $password, $role, $cardno);
+        return $users; 
     }
-    public function getUser()
+    
+
+    public function getAttendance()
     {
-        return $this->zk->getUser();
+        $this->connect();
+        $attendance = $this->zk->getAttendance();  
+        $this->zk->disconnect();
+
+        return $attendance;
     }
+    
 }
-?>
