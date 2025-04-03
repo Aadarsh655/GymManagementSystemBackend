@@ -14,6 +14,7 @@ use App\Http\Controllers\Payment\PaymentController;
 use Rats\Zkteco\Lib\ZKTeco;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\KhaltiPaymentController;
+use App\Http\Controllers\Notice\NoticeController;
 Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware('guest')
     ->name('register');
@@ -71,6 +72,9 @@ Route::post('/enquiries/reply/{id}', [EnquiryController::class, 'reply']);
 Route::delete('/enquiries',[EnquiryController::class,'destroy']);
 Route::delete('/enquiries/{id}',[EnquiryController::class,'destroy']);
 Route::get('/enquiries',[EnquiryController::class,'index']);
+
+Route::get('/notices',[NoticeController::class,'index']);
+Route::post('/notices',[NoticeController::class,'store']);
 
 Route::get('/test-zkteco', [AttendanceController::class,'checkConnection']);
 Route::get('/getusers', [AttendanceController::class,'getUsers']);
