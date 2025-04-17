@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Payment;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
@@ -70,8 +71,8 @@ class PaymentController extends Controller
     public function update(Request $request, $payment_id)
     {
         $validatedData = $request->validate([
-            'user_id' => 'sometimes|exists:users,id', // Ensure user exists
-            'membership_id' => 'sometimes|exists:memberships,membership_id', // Ensure membership exists
+            'user_id' => 'sometimes|exists:users,id', 
+            'membership_id' => 'sometimes|exists:memberships,membership_id', 
             'discount' => 'nullable|integer|min:0',
             'paid_amount' => 'nullable|integer|min:0',
             'paid_date' => 'nullable|date',
@@ -111,6 +112,42 @@ class PaymentController extends Controller
             ],
         ]);
     }
+    public function getUserPayments(Request $request)
+    {
+        $user = Auth::user();
+    
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
+    
+        $payments = Payment::with('membership')
+            ->where('user_id', $user->id)
+            ->get();
+    
+        $formattedPayments = $payments->map(function ($payment) use ($user) {
+            return [
+                'payment_id' => $payment->payment_id,
+                'user_id' => $payment->user_id,
+                'user_name' => $user->name,
+                'membership_id' => $payment->membership->membership_id ?? null,
+                'membership_name' => $payment->membership->membership_name ?? 'Unknown Membership',
+                'amount' => $payment->amount,
+                'discount' => $payment->discount,
+                'paid_amount' => $payment->paid_amount,
+                'due_amount' => $payment->due_amount,
+                'status' => $payment->status,
+                'paid_date' => $payment->paid_date,
+                'expire_date' => $payment->expire_date,
+            ];
+        });
+    
+        return response()->json([
+            'message' => 'Payments fetched successfully.',
+            'payments' => $formattedPayments,
+        ]);
+    }
+    
+
     public function destroy($payment_id)
     {
         $payment = Payment::findOrFail($payment_id);

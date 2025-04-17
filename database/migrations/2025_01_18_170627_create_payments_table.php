@@ -21,8 +21,8 @@ return new class extends Migration
             $table->integer('due_amount')->virtualAs('COALESCE(amount, 0) - COALESCE(discount, 0) - COALESCE(paid_amount, 0)');
             $table->enum('status', ['Paid', 'Unpaid'])->virtualAs('CASE WHEN COALESCE(due_amount, 0) = 0 THEN "Paid" ELSE "Unpaid" END');
             $table->timestamp('paid_date')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->date('expire_date')->nullable(); // Manually calculate in application logic
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'); // Foreign key constraint
+            $table->date('expire_date')->nullable(); 
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('membership_id')->references('membership_id')->on('memberships')
                   ->onUpdate('cascade')->onDelete('set null');
             $table->timestamps();

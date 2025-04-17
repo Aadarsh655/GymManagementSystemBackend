@@ -15,6 +15,8 @@ use Rats\Zkteco\Lib\ZKTeco;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\KhaltiPaymentController;
 use App\Http\Controllers\Notice\NoticeController;
+use App\Http\Controllers\TestimonialController;
+
 Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware('guest')
     ->name('register');
@@ -48,26 +50,25 @@ Route::post('/email/verification-notification', [EmailVerificationNotificationCo
 
 Route::middleware('auth:sanctum')->post('/logout', [AuthenticatedSessionController::class, 'destroy']);
 
-//Blog
 Route::post('/blog', [BlogController::class, 'store']);
 Route::get('/blog-table', [BlogController::class, 'index']);
 Route::post('/blog/{id}',[BlogController::class,'update']);
 Route::delete('/blog/{blog}',[BlogController::class, 'destroy']);
 Route::get('/blog/{slug}', [BlogController::class, 'show']);
 
-//Dashboard Count
 Route::get('/dashboardCount',[DashboardController::class,'dashboardCounts']);
-//Membership
+
 Route::post('/membership',[MembershipController::class, 'store']);
 Route::get('/membership',[MembershipController::class, 'index']);
 Route::patch('/membership/{id}',[MembershipController::class,'update']);
-//Payments
+
 Route::post('/payments',[PaymentController::class,'store']);
 Route::get('/payments',[PaymentController::class,'index']);
 Route::patch('/payments/{payment_id}',[PaymentController::class,'update']);
 Route::delete('/payments/{payment_id}',[PaymentController::class,'destroy']);
-//Enquiry
-Route::post('/enquiries', [EnquiryController::class, 'store']); // Save enquiry
+Route::middleware('auth:sanctum')->get('/userpayments', [PaymentController::class, 'getUserPayments']);
+
+Route::post('/enquiries', [EnquiryController::class, 'store']); 
 Route::post('/enquiries/reply/{id}', [EnquiryController::class, 'reply']); 
 Route::delete('/enquiries',[EnquiryController::class,'destroy']);
 Route::delete('/enquiries/{id}',[EnquiryController::class,'destroy']);
@@ -84,6 +85,11 @@ Route::post('/attendance/store', [AttendanceController::class, 'storeAttendance'
 Route::post('/khalti/payment', [KhaltiPaymentController::class, 'purchase']);
 
 Route::post('/khalti/payment/verify', [KhaltiPaymentController::class, 'verify']);
+Route::middleware('auth:sanctum')->post('/testimonials', [TestimonialController::class, 'store']);
+Route::get('/testimonials', [TestimonialController::class, 'getTestimonials']);
+Route::get('/publishedtestimonials', [TestimonialController::class, 'getPublishTestimonial']);
+Route::patch('testimonials/{id}/publish', [TestimonialController::class, 'publish']);
+
 
 
 
