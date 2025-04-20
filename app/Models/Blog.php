@@ -38,9 +38,5 @@ class Blog extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
-    public function getRouteKeyName()
-{
-    return 'slug';
-}
 
 }

@@ -19,6 +19,6 @@ class Membership extends Model
     ];
 
     protected $casts = [
-        'facilities' => 'array', // Automatically cast JSON to array
+        'facilities' => 'array', 
     ];
 }

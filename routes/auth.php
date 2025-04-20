@@ -53,7 +53,7 @@ Route::middleware('auth:sanctum')->post('/logout', [AuthenticatedSessionControll
 Route::post('/blog', [BlogController::class, 'store']);
 Route::get('/blog-table', [BlogController::class, 'index']);
 Route::post('/blog/{id}',[BlogController::class,'update']);
-Route::delete('/blog/{blog}',[BlogController::class, 'destroy']);
+Route::delete('/blog/{blog}', [BlogController::class, 'destroy']);
 Route::get('/blog/{slug}', [BlogController::class, 'show']);
 
 Route::get('/dashboardCount',[DashboardController::class,'dashboardCounts']);
@@ -61,6 +61,7 @@ Route::get('/dashboardCount',[DashboardController::class,'dashboardCounts']);
 Route::post('/membership',[MembershipController::class, 'store']);
 Route::get('/membership',[MembershipController::class, 'index']);
 Route::patch('/membership/{id}',[MembershipController::class,'update']);
+Route::delete('/membership/delete',[MembershipController::class,'destroy']);
 
 Route::post('/payments',[PaymentController::class,'store']);
 Route::get('/payments',[PaymentController::class,'index']);
@@ -89,7 +90,4 @@ Route::middleware('auth:sanctum')->post('/testimonials', [TestimonialController:
 Route::get('/testimonials', [TestimonialController::class, 'getTestimonials']);
 Route::get('/publishedtestimonials', [TestimonialController::class, 'getPublishTestimonial']);
 Route::patch('testimonials/{id}/publish', [TestimonialController::class, 'publish']);
-
-
-
 

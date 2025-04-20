@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Membership;
 
 use App\Http\Controllers\Controller;
 use App\Models\Membership;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 
 class MembershipController extends Controller
@@ -42,6 +43,26 @@ class MembershipController extends Controller
         'membership' => $membership,
     ], 200);
 }
+    public function destroy(Request $request): Response
+    {
+        $ids = $request->input('ids');
+
+        if (!is_array($ids) || empty($ids)) {
+            return response([
+                'message' => 'No blog IDs provided.'
+            ], 400);
+        }
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:memberships,membership_id',
+        ]);
+
+        Membership::whereIn('membership_id', $ids)->delete();
+
+        return response([
+            'message' => 'Blog(s) deleted successfully.'
+        ], 200);
+    }
 
     public function index(){
         $membership=Membership::select('membership_id','membership_name','price','facilities','status')->get()->map(function($membership){

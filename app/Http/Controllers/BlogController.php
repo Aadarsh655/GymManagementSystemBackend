@@ -63,15 +63,6 @@ class BlogController extends Controller
             ]),
         ],200);
     }
-    
-
-    public function destroy(Blog $blog): Response{
-        $blog->delete();
-    
-    return response([
-        'message'=>'Blog deleted Successfully',
-    ],200);
-    }
 
     public function index() {
         $blogs = Blog::select('id', 'title', 'content', 'status','image', 'slug', 'created_at')
@@ -82,6 +73,27 @@ class BlogController extends Controller
             });
 
         return response()->json($blogs, 200, ['Content-Type' => 'application/json']);
+    }
+
+    public function destroy(Request $request): Response
+    {
+        $ids = $request->input('ids');
+    
+        if (!is_array($ids) || empty($ids)) {
+            return response([
+                'message' => 'No blog IDs provided.'
+            ], 400);
+        }
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:blog,id',
+        ]);
+
+        Blog::whereIn('id', $ids)->delete();
+    
+        return response([
+            'message' => 'Blog(s) deleted successfully.'
+        ], 200);
     }
 
     public function show($slug)
