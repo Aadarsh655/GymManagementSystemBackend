@@ -91,33 +91,28 @@ class AttendanceController extends Controller
         return response()->json(['message' => 'Attendance recorded successfully'], 200);
     }
 
-    public function getAttendanceByDB(Request $request)
+public function getAttendanceByDB(Request $request)
 {
-    // Validate the input date
     $request->validate([
         'date' => 'required|date',
     ]);
 
-    // Format the input date to match the format in the database
     $inputDate = Carbon::parse($request->date)->format('Y-m-d');
-
-    // Retrieve attendance data from the 'attendances' table
     $attendanceData = Attendance::whereDate('timestamp', $inputDate)->get();
 
-    // Check if any attendance data was found for the given date
     if ($attendanceData->count() > 0) {
         return response()->json([
             'success' => true,
-            'attendance' => $attendanceData,  // Return the attendance data
+            'attendance' => $attendanceData,
         ], 200);
     }
 
-    // If no attendance data found, return an appropriate response
     return response()->json([
         'success' => false,
         'message' => 'No attendance found for the given date',
     ], 404);
 }
+
 
 }
 

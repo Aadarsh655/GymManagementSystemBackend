@@ -88,10 +88,9 @@ class RegisteredUserController extends Controller
     }
     
     public function index(){
-        $user = User::select('id','name','email','role','image','age','gender','blood_group')
+        $user = User::select('id','name','email','role','image','age','gender','blood_group','status')
         ->get()->map(function($user){
            $user->image_url = $user->image ? url('storage/'  . $user->image) : null;
-           $user->status = 'Active';
            return $user; 
         });
         return response()->json($user);
@@ -114,4 +113,16 @@ class RegisteredUserController extends Controller
             'gender' => $user->gender,
             'blood_group' => $user->blood_group,
         ]);}
+
+    public function archive($id)
+    {
+        $user = User::findOrFail($id);
+        $user->status = 'Inactive';
+        $user->save();
+
+        return response()->json([
+            'message' => 'User archived successfully!',
+            'user' => $user
+        ]);
+    }
 }

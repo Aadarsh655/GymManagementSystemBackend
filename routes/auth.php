@@ -24,6 +24,7 @@ Route::put('/register/{id}',[RegisteredUserController::class,'update']);
 
 Route::get('/users', [RegisteredUserController::class, 'index']);
 Route::middleware('auth:sanctum')->get('/user', [RegisteredUserController::class, 'getLoggedInUserDetails']);
+Route::patch('/users/{id}/archive', [RegisteredUserController::class, 'archive']);
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest')
