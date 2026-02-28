@@ -16,6 +16,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\KhaltiPaymentController;
 use App\Http\Controllers\Notice\NoticeController;
 use App\Http\Controllers\TestimonialController;
+use App\Http\Controllers\TrainerController;
 
 Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware('guest')
@@ -91,4 +92,9 @@ Route::middleware('auth:sanctum')->post('/testimonials', [TestimonialController:
 Route::get('/testimonials', [TestimonialController::class, 'getTestimonials']);
 Route::get('/publishedtestimonials', [TestimonialController::class, 'getPublishTestimonial']);
 Route::patch('testimonials/{id}/publish', [TestimonialController::class, 'publish']);
+
+Route::get('/trainers', [TrainerController::class, 'index']);
+Route::post('/trainers', [TrainerController::class, 'store']);
+Route::post('/trainers/{id}', [TrainerController::class, 'update']);
+Route::delete('/trainers/delete', [TrainerController::class, 'destroy']);
 

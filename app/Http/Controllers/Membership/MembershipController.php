@@ -13,6 +13,7 @@ class MembershipController extends Controller
     {
         $validatedData = $request->validate([
             'membership_name' => 'required|string|max:255',
+            'category' => 'required|string|in:Gym,MMA',
             'price' => 'required|numeric|min:0',
             'facilities' => 'nullable|array',
             'status' => 'required|in:Active,Inactive',
@@ -31,6 +32,7 @@ class MembershipController extends Controller
 
     $validatedData = $request->validate([
         'membership_name' => 'required|string|max:255',
+        'category' => 'required|string|in:Gym,MMA',
         'price' => 'required|numeric|min:0',
         'facilities' => 'nullable|array',
         'status' => 'required|in:Active,Inactive',
@@ -65,7 +67,7 @@ class MembershipController extends Controller
     }
 
     public function index(){
-        $membership=Membership::select('membership_id','membership_name','price','facilities','status')->get()->map(function($membership){
+        $membership=Membership::select('membership_id','membership_name','category','price','facilities','status')->get()->map(function($membership){
             return $membership;
         });
         return response()->json($membership);
