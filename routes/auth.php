@@ -18,6 +18,7 @@ use App\Http\Controllers\Notice\NoticeController;
 use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\TrainerController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\MembershipApplicationController;
 
 Route::post('/register', [RegisteredUserController::class , 'store'])
     ->middleware('guest')
@@ -27,6 +28,7 @@ Route::put('/register/{id}', [RegisteredUserController::class , 'update']);
 Route::get('/users', [RegisteredUserController::class , 'index']);
 Route::middleware('auth:sanctum')->get('/user', [RegisteredUserController::class , 'getLoggedInUserDetails']);
 Route::patch('/users/{id}/archive', [RegisteredUserController::class , 'archive']);
+Route::delete('/users/delete', [RegisteredUserController::class , 'destroy']);
 
 Route::post('/login', [AuthenticatedSessionController::class , 'store'])
     ->middleware('guest')
@@ -71,6 +73,11 @@ Route::get('/payments', [PaymentController::class , 'index']);
 Route::patch('/payments/{payment_id}', [PaymentController::class , 'update']);
 Route::delete('/payments/{payment_id}', [PaymentController::class , 'destroy']);
 Route::middleware('auth:sanctum')->get('/userpayments', [PaymentController::class , 'getUserPayments']);
+
+Route::post('/membership-applications', [MembershipApplicationController::class, 'store']);
+Route::middleware('auth:sanctum')->get('/membership-applications', [MembershipApplicationController::class, 'index']);
+Route::middleware('auth:sanctum')->get('/membership-applications/{id}', [MembershipApplicationController::class, 'show']);
+Route::middleware('auth:sanctum')->delete('/membership-applications/{id}', [MembershipApplicationController::class, 'destroy']);
 
 Route::post('/enquiries', [EnquiryController::class , 'store']);
 

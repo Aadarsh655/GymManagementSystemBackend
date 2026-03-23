@@ -11,12 +11,20 @@ class TestimonialController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
-            'image' => 'required|string',
+            'image' => 'nullable|string|max:2048',
             'comment' => 'required|string',
             'rating' => 'required|integer|between:1,5',
         ]);
 
-        $relativeImagePath = str_replace(url('storage') . '/', '', $request->image);
+        $relativeImagePath = null;
+        if ($request->filled('image')) {
+            $raw = $request->input('image');
+            $relativeImagePath = str_replace(url('storage').'/', '', $raw);
+            if ($relativeImagePath === $raw && preg_match('#/storage/(.+)$#', $raw, $m)) {
+                $relativeImagePath = $m[1];
+            }
+            $relativeImagePath = $relativeImagePath !== '' ? $relativeImagePath : null;
+        }
 
         $testimonial = Testimonial::create([
             'name' => $request->name,
@@ -25,7 +33,7 @@ class TestimonialController extends Controller
             'rating' => $request->rating,
         ]);
 
-        $testimonial->image_url = url('storage/' . $testimonial->image);
+        $testimonial->image_url = $testimonial->image ? url('storage/'.$testimonial->image) : null;
 
         return response()->json($testimonial, 201);
     }

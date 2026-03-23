@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -124,5 +126,31 @@ class RegisteredUserController extends Controller
             'message' => 'User archived successfully!',
             'user' => $user
         ]);
+    }
+
+    public function destroy(Request $request): JsonResponse
+    {
+        $ids = $request->input('ids');
+
+        if (! is_array($ids) || empty($ids)) {
+            return response()->json(['message' => 'No user IDs provided.'], 400);
+        }
+
+        if (Auth::check() && in_array(Auth::id(), $ids, true)) {
+            return response()->json(['message' => 'You cannot delete your own account.'], 422);
+        }
+
+        DB::transaction(function () use ($ids) {
+            Attendance::whereIn('user_id', $ids)->delete();
+            $users = User::whereIn('id', $ids)->get();
+            foreach ($users as $user) {
+                if ($user->image) {
+                    Storage::disk('public')->delete($user->image);
+                }
+                $user->delete();
+            }
+        });
+
+        return response()->json(['message' => 'User(s) deleted successfully.'], 200);
     }
 }
