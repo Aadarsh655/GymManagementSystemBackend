@@ -19,6 +19,7 @@ use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\TrainerController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\MembershipApplicationController;
+use App\Http\Controllers\SiteMediaAssetController;
 
 Route::post('/register', [RegisteredUserController::class , 'store'])
     ->middleware('guest')
@@ -113,3 +114,6 @@ Route::post('/organizations', [OrganizationController::class , 'store']);
 Route::get('/organizations/{organization}', [OrganizationController::class , 'show']);
 Route::post('/organizations/{id}', [OrganizationController::class , 'update']);
 Route::delete('/organizations/{id}', [OrganizationController::class , 'destroy']);
+
+Route::get('/site-media', [SiteMediaAssetController::class, 'index']);
+Route::middleware('auth:sanctum')->post('/site-media/{itemKey}', [SiteMediaAssetController::class, 'update']);
